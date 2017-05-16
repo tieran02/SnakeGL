@@ -4,9 +4,10 @@
 
 float deltaTime = 0.0;
 int thisTime = 0;
-int lastTime = 0;
+int lastTime = 0;
 
-Game::Game(): m_IsRunning(false), m_direction(1,0), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr)
+
+Game::Game(): m_IsRunning(false), m_direction(1,-1), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr)
 {
 }
 
@@ -62,6 +63,15 @@ void Game::logic()
 	this->m_headSprite->SetRotation(std::atan2(this->m_direction.x, -this->m_direction.y));
 
 	//TODO: Check if snake has left area
+	if (this->m_pos.x > this->m_window->Width())
+		this->m_pos.x = 0;
+	if (this->m_pos.x < 0)
+		this->m_pos.x = this->m_window->Width();
+
+	if(this->m_pos.y > this->m_window->Height())
+		this->m_pos.y = 0;
+	if (this->m_pos.y < 0)
+		this->m_pos.y = this->m_window->Height();
 	
 }
 
