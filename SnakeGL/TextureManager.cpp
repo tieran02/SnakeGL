@@ -19,7 +19,6 @@ Texture* TextureManager::GetTexture(char* path, char* filename, char* type)
 	else
 	{
 		//Texture does exist
-		std::cout << "Texture '" << filename << "' already added!";
 		return this->m_textureMap[filename];
 	}
 }

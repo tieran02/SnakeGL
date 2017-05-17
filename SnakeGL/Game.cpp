@@ -1,13 +1,15 @@
 #include "Game.h"
 #include <GL/glew.h>
 #include "ResourceManager.h"
+#include <iostream>
+#include <string>
 
 float deltaTime = 0.0;
 int thisTime = 0;
 int lastTime = 0;
 
 
-Game::Game(): m_IsRunning(false), m_direction(1,-1), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr)
+Game::Game() : m_IsRunning(false), m_direction(0, 0), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr), m_rotation(0.0f), m_fruitSprite(nullptr), m_fruitPos(0,0)
 {
 }
 
@@ -32,8 +34,17 @@ void Game::Create(int width, int height, char* title)
 	this->m_pos = glm::vec2(width / 2, height / 2);
 	//Create Snake Head Sprites
 	this->m_headSprite = new Sprite();
-	m_headSprite->Init("./res", "head.png", 16, 16);
-
+	this->m_headSprite->Init("./res", "head.png", 16, 16);
+	this->m_fruitSprite = new Sprite();
+	this->m_fruitSprite->Init("./res", "apple.png", 16, 16);
+	for (int i = 0; i < 100; i++)
+	{
+		this->m_tailSprites[i] = new Sprite();
+		this->m_tailSprites[i]->Init("./res", "body.png", 16, 16);
+	}
+	nTail = 0;
+	//Place Fruit
+	this->m_fruitPos = glm::vec2(rand() % this->m_window->Width() , rand () % this->m_window->Height());
 	loop();
 }
 
@@ -56,11 +67,25 @@ void Game::loop()
 void Game::logic()
 {
 	//Move Snake;
-	if(this->m_direction != glm::vec2(0,0))
-		this->m_direction = glm::normalize(this->m_direction);
-	this->m_pos += this->m_direction * deltaTime * 60.0f;
+	this->m_direction = glm::vec2(cos(this->m_rotation), sin(this->m_rotation));
+	this->m_pos += this->m_direction * deltaTime * 300.0f;
 	//Set Snakes roation to facing direction
-	this->m_headSprite->SetRotation(std::atan2(this->m_direction.x, -this->m_direction.y));
+	this->m_headSprite->SetRotation(this->m_rotation + 1.5708);
+
+	//Tails
+	glm::vec2 prev = tail[0];
+	glm::vec2 prev2;
+	tail[0] = this->m_pos;
+	for (int i = 1; i < nTail; i++)
+	{
+		prev2 = tail[i];
+		tail[i] = prev;
+		prev = prev2;
+
+		if (overlap(this->m_pos, tail[i],1)) {
+			this->m_IsRunning = false;
+		}
+	}
 
 	//TODO: Check if snake has left area
 	if (this->m_pos.x > this->m_window->Width())
@@ -72,12 +97,23 @@ void Game::logic()
 		this->m_pos.y = 0;
 	if (this->m_pos.y < 0)
 		this->m_pos.y = this->m_window->Height();
+
+	if (overlap(this->m_pos, this->m_fruitPos,16)) {
+		score += 10;
+		this->m_fruitPos = glm::vec2(rand() % this->m_window->Width(), rand() % this->m_window->Height());
+		this->nTail++;
+		std::cout << "\nScore = " << this->score;
+	}
+
 	
 }
 
 void Game::input()
 {
 	SDL_Event event;
+
+	bool left = false;
+	bool right = false;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -93,11 +129,27 @@ void Game::input()
 					case SDLK_ESCAPE:
 						this->m_IsRunning = false;
 					break;
+
+					default:
+						left = false;
+						right = false;
+						break;
+
+					case SDLK_d:
+						right = true;
+					break;
+					case SDLK_a:
+						left = true;
+						break;
 				}
 		default:
 			break;
 		}
 	}
+	if (right)
+		this->m_rotation += 15.0f * deltaTime;
+	if (left)
+		this->m_rotation -= 15.0f * deltaTime;
 }
 
 void Game::render()
@@ -110,5 +162,24 @@ void Game::render()
 	this->m_camera->Update(this->m_shader);
 	//Render Code here
 	m_headSprite->Draw(m_shader, this->m_pos);
+
+	for (int i = 0; i < nTail; i++)
+	{
+		m_tailSprites[i]->Draw(m_shader, this->tail[i]);
+	}
+
+	m_fruitSprite->Draw(m_shader, this->m_fruitPos);	
+
 	this->m_shader->Unbind();
+}
+
+bool Game::overlap(glm::vec2 a, glm::vec2 b,int size)
+{
+	if (a.x > b.x - size && a.x < b.x + size)
+		if (a.y > b.y - size && a.y < b.y + size) {
+			//std::cout << "Intersected!\n";
+			return true;
+		}
+			
+	return false;
 }

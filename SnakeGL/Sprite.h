@@ -12,12 +12,13 @@ public:
 	void Draw(Shader* shader, glm::vec2 pos);
 	void SetRotation(float rotation) { m_rotation = rotation; }
 	float GetRotation() { return m_rotation; }
+	glm::mat4 Model() { return m_model; }
 private:
 	glm::vec2 m_pos;
 	float m_scale;
 	float m_rotation;
 	int m_width, m_height;
-	glm::mat4x4 m_model;
+	glm::mat4 m_model;
 
 	GLuint m_vboID;
 	GLuint m_vaoID;

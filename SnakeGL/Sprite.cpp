@@ -66,14 +66,11 @@ void Sprite::Draw(Shader* shader, glm::vec2 pos)
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "ourTexture"), 0);
 	glBindTexture(GL_TEXTURE_2D, this->m_textureID);
+	glActiveTexture(GL_TEXTURE0);
 
+	shader->SetUniform("model", this->m_model, 1, GL_FALSE);
 
 	glBindVertexArray(this->m_vaoID);
 	glDrawArrays(GL_TRIANGLES, 0, 6); // We set the count to 6 since we're drawing 6 vertices now (2 triangles); not 3!
 	glBindVertexArray(0);
-
-	shader->SetUniform("model", this->m_model, 1, GL_FALSE);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 }
