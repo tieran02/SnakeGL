@@ -9,7 +9,7 @@ int thisTime = 0;
 int lastTime = 0;
 
 
-Game::Game() : m_IsRunning(false), m_direction(0, 0), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr), m_rotation(0.0f), m_fruitSprite(nullptr), m_fruitPos(0,0)
+Game::Game() : m_IsRunning(false), m_rotation(0.0f), score(0), m_fruitPos(0, 0), m_direction(0, 0), nTail(0), m_window(nullptr), m_shader(nullptr), m_camera(nullptr), m_headSprite(nullptr), m_fruitSprite(nullptr)
 {
 }
 
@@ -64,6 +64,7 @@ void Game::loop()
 	}
 }
 
+int delay = 0;
 void Game::logic()
 {
 	//Move Snake;
@@ -73,18 +74,25 @@ void Game::logic()
 	this->m_headSprite->SetRotation(this->m_rotation + 1.5708);
 
 	//Tails
-	glm::vec2 prev = tail[0];
-	glm::vec2 prev2;
-	tail[0] = glm::vec2(this->m_pos.x,this->m_pos.y);
-	for (int i = 1; i < nTail; i++)
-	{
-		prev2 = tail[i];
-		tail[i] = prev;
-		prev = prev2;
-
-		if (overlap(this->m_pos, tail[i],1)) {
-			this->m_IsRunning = false;
+	if (delay >= 9) {
+		glm::vec2 prev = tail[0];
+		glm::vec2 prev2;
+		tail[0] = glm::vec2(this->m_pos.x, this->m_pos.y);
+		for (int i = 1; i < nTail; i++)
+		{
+			prev2 = tail[i];
+			tail[i] = prev;
+			prev = prev2;
+			delay = 0;
 		}
+	}
+	else
+		delay++;
+		
+	for (int i = 3; i < nTail; i++)
+	{
+		if (overlap(this->m_pos, tail[i], 8))
+			this->m_IsRunning = false;
 	}
 
 	//TODO: Check if snake has left area
@@ -99,9 +107,9 @@ void Game::logic()
 		this->m_pos.y = this->m_window->Height();
 
 	if (overlap(this->m_pos, this->m_fruitPos,16)) {
-		score += 10;
 		this->m_fruitPos = glm::vec2(rand() % this->m_window->Width(), rand() % this->m_window->Height());
 		this->nTail++;
+		score += 10;
 		std::cout << "\nScore = " << this->score;
 	}
 
@@ -124,32 +132,21 @@ void Game::input()
 				break;
 
 			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym)
-				{
-					case SDLK_ESCAPE:
-						this->m_IsRunning = false;
-					break;
+			switch (event.key.keysym.sym)
+			{
+				case SDLK_ESCAPE:
+					this->m_IsRunning = false;
+				break;
 
-					default:
-						left = false;
-						right = false;
-						break;
-
-					case SDLK_d:
-						right = true;
-					break;
-					case SDLK_a:
-						left = true;
-						break;
-				}
-		default:
-			break;
+				case SDLK_d:
+					this->m_rotation += 15.0f * deltaTime;
+				break;
+				case SDLK_a:
+					this->m_rotation -= 15.0f * deltaTime;
+				break;
+			}
 		}
 	}
-	if (right)
-		this->m_rotation += 15.0f * deltaTime;
-	if (left)
-		this->m_rotation -= 15.0f * deltaTime;
 }
 
 void Game::render()
