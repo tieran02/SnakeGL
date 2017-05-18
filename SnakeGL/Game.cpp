@@ -68,14 +68,14 @@ void Game::logic()
 {
 	//Move Snake;
 	this->m_direction = glm::vec2(cos(this->m_rotation), sin(this->m_rotation));
-	this->m_pos += this->m_direction * deltaTime * 300.0f;
+	this->m_pos += this->m_direction * deltaTime * 150.0f;
 	//Set Snakes roation to facing direction
 	this->m_headSprite->SetRotation(this->m_rotation + 1.5708);
 
 	//Tails
 	glm::vec2 prev = tail[0];
 	glm::vec2 prev2;
-	tail[0] = this->m_pos;
+	tail[0] = glm::vec2(this->m_pos.x,this->m_pos.y);
 	for (int i = 1; i < nTail; i++)
 	{
 		prev2 = tail[i];
