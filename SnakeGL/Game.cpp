@@ -16,7 +16,7 @@ Game::Game() : m_IsRunning(false), m_rotation(0.0f), score(0), m_fruitPos(0, 0),
 
 Game::~Game()
 {
-	this->m_window->Destroy();
+
 }
 
 void Game::Create(int width, int height, char* title)
@@ -32,6 +32,8 @@ void Game::Create(int width, int height, char* title)
 	this->m_camera = new Camera(width, height,zoom);
 	//Set Snakes Position
 	this->m_pos = glm::vec2(width / 2, height / 2);
+	//Snake Speed
+	this->m_speed = 150.0f;
 	//Create Snake Head Sprites
 	this->m_headSprite = new Sprite();
 	this->m_headSprite->Init("./res", "head.png", 16, 16);
@@ -69,12 +71,12 @@ void Game::logic()
 {
 	//Move Snake;
 	this->m_direction = glm::vec2(cos(this->m_rotation), sin(this->m_rotation));
-	this->m_pos += this->m_direction * deltaTime * 150.0f;
+	this->m_pos += this->m_direction * deltaTime * this->m_speed;
 	//Set Snakes roation to facing direction
 	this->m_headSprite->SetRotation(this->m_rotation + 1.5708);
 
 	//Tails
-	if (delay >= 9) {
+	if (delay >= this->m_speed/10) {
 		glm::vec2 prev = tail[0];
 		glm::vec2 prev2;
 		tail[0] = glm::vec2(this->m_pos.x, this->m_pos.y);
@@ -169,6 +171,7 @@ void Game::render()
 
 	this->m_shader->Unbind();
 }
+
 
 bool Game::overlap(glm::vec2 a, glm::vec2 b,int size)
 {

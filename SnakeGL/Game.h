@@ -16,11 +16,12 @@ public:
 private:
 	bool m_IsRunning;
 	float m_rotation;
+	float m_speed;
 	int score;
 	glm::vec2 m_fruitPos;
 	glm::vec2 m_direction;
 	glm::vec2 m_pos;
-	glm::vec2 tail[100];
+	glm::vec2 tail[501];
 	int nTail;
 
 	void loop();
